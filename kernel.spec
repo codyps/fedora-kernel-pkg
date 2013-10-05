@@ -745,6 +745,9 @@ Patch25115: elevator-acquire-q-sysfs_lock-in-elevator_change.patch
 #rhbz 974072
 Patch25116: rt2800-add-support-for-rf3070.patch
 
+#zcache
+Patch26000: zcache_v2-3.11.3.patch
+
 # END OF PATCH DEFINITIONS
 
 %endif
