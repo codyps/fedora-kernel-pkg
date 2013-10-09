@@ -95,9 +95,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 3
+%define rcrev 4
 # The git snapshot level
-%define gitrev 5
+%define gitrev 2
 # Set rpm version accordingly
 %define rpmversion 3.%{upstream_sublevel}.0
 %endif
@@ -705,7 +705,6 @@ Patch15000: nowatchdog-on-virt.patch
 
 # lpae
 Patch21001: arm-lpae-ax88796.patch
-Patch21003: arm-dma-amba_pl08x-avoid-64bit-division.patch
 Patch21004: arm-sound-soc-samsung-dma-avoid-another-64bit-division.patch
 Patch21005: arm-exynos-mp.patch
 
@@ -726,9 +725,6 @@ Patch21247: ath9k_rx_dma_stop_check.patch
 
 Patch22000: weird-root-dentry-name-debug.patch
 
-#selinux ptrace child permissions
-Patch22001: selinux-apply-different-permission-to-ptrace-child.patch
-
 Patch25047: drm-radeon-Disable-writeback-by-default-on-ppc.patch
 
 #CVE-2013-4345 rhbz 1007690 1009136
@@ -746,6 +742,16 @@ Patch25115: elevator-acquire-q-sysfs_lock-in-elevator_change.patch
 
 #rhbz 974072
 Patch25116: rt2800-add-support-for-rf3070.patch
+
+#rhbz 982153
+Patch25123: iommu-Remove-stack-trace-from-broken-irq-remapping-warning.patch
+
+#rhbz 998732
+Patch25124: vfio-iommu-Fixed-interaction-of-VFIO_IOMMU_MAP_DMA.patch
+
+#rhbz 896695
+Patch25126: 0001-iwlwifi-don-t-WARN-on-host-commands-sent-when-firmwa.patch
+Patch25127: 0002-iwlwifi-don-t-WARN-on-bad-firmware-state.patch
 
 #zcache
 Patch26000: zcache_v2-3.11.3.patch
@@ -1306,10 +1312,9 @@ ApplyPatch debug-bad-pte-modules.patch
 # ARM
 #
 ApplyPatch arm-lpae-ax88796.patch
-#ApplyPatch arm-dma-amba_pl08x-avoid-64bit-division.patch
 ApplyPatch arm-sound-soc-samsung-dma-avoid-another-64bit-division.patch
 #pplyPatch arm-exynos-mp.patch
-#pplyPatch arm-omap-load-tfp410.patch
+ApplyPatch arm-omap-load-tfp410.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
 
 #
@@ -1426,9 +1431,6 @@ ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 
 #pplyPatch weird-root-dentry-name-debug.patch
 
-#selinux ptrace child permissions
-ApplyPatch selinux-apply-different-permission-to-ptrace-child.patch
-
 # https://fedoraproject.org/wiki/Features/Checkpoint_Restore
 ApplyPatch criu-no-expert.patch
 
@@ -1452,6 +1454,16 @@ ApplyPatch elevator-acquire-q-sysfs_lock-in-elevator_change.patch
 
 #rhbz 974072
 ApplyPatch rt2800-add-support-for-rf3070.patch
+
+#rhbz 982153
+ApplyPatch iommu-Remove-stack-trace-from-broken-irq-remapping-warning.patch
+
+#rhbz 998732
+ApplyPatch vfio-iommu-Fixed-interaction-of-VFIO_IOMMU_MAP_DMA.patch
+
+#rhbz 896695
+ApplyPatch 0001-iwlwifi-don-t-WARN-on-host-commands-sent-when-firmwa.patch
+ApplyPatch 0002-iwlwifi-don-t-WARN-on-bad-firmware-state.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1949,7 +1961,6 @@ find $RPM_BUILD_ROOT/usr/include \
 %endif
 
 %if %{with_perf}
-mkdir -p $RPM_BUILD_ROOT/%{_libexecdir}/perf-core
 # perf tool binary and supporting scripts/binaries
 %{perf_make} DESTDIR=$RPM_BUILD_ROOT install
 
@@ -2259,6 +2270,36 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Wed Oct 09 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.12.0-0.rc4.git2.1
+- Don't trigger a stack trace on crashing iwlwifi firmware (rhbz 896695)
+- Linux v3.12-rc4-29-g0e7a3ed
+
+* Wed Oct 09 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix VFIO IOMMU crash (rhbz 998732)
+
+* Tue Oct 8  2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Tiny ARM config update
+
+* Tue Oct 08 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.12.0-0.rc4.git1.1
+- Linux v3.12-rc4-19-g8b5ede6
+- Reenable debugging options.
+- Quiet irq remapping stack trace (rhbz 982153)
+
+* Mon Oct 7  2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- General ARM config cleanups
+- Remove old/dupe ARM config options
+- Enable external connectors on ARM
+- Enable i.MX and TI thermal controllers
+- Enable i.MX RNG driver
+- ARM MFD and REGULATOR changes and cleanups
+- AM33xx (BeagleBone) config improvements
+- Rebase OMAP DVI patch
+- Enable console for Zynq-7xxx SoCs
+
+* Sun Oct 06 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.12.0-0.rc4.git0.1
+- Linux v3.12-rc4
+- Disable debugging options.
+
 * Fri Oct 04 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.12.0-0.rc3.git5.1
 - Linux v3.12-rc3-296-g15c83d2
 
