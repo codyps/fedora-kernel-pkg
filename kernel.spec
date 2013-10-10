@@ -2012,9 +2012,7 @@ install -m644 %{SOURCE2001} %{buildroot}%{_sysconfdir}/sysconfig/cpupower
 %endif
 
 %if %{with_bootwrapper}
-Arch=`head -1 .config | cut -b 3-`
-echo USING ARCH=$Arch
-make ARCH=$Arch DESTDIR=$RPM_BUILD_ROOT bootwrapper_install WRAPPER_OBJDIR=%{_libdir}/kernel-wrapper WRAPPER_DTSDIR=%{_libdir}/kernel-wrapper/dts
+make ARCH=%{hdrarch} DESTDIR=$RPM_BUILD_ROOT bootwrapper_install WRAPPER_OBJDIR=%{_libdir}/kernel-wrapper WRAPPER_DTSDIR=%{_libdir}/kernel-wrapper/dts
 %endif
 
 
@@ -2071,7 +2069,23 @@ fi\
 #
 %define kernel_variant_posttrans() \
 %{expand:%%posttrans %{?1}}\
-/bin/kernel-install add %{KVERREL}%{?1:+%{1}} /%{image_install_path}/vmlinuz-%{KVERREL}%{?1:+%{1}} || exit $?\
+if [ -x /bin/kernel-install ]\
+then \
+	/bin/kernel-install add %{KVERREL}%{?1:+%{1}} /%{image_install_path}/vmlinuz-%{KVERREL}%{?1:+%{1}} || exit $?\
+else \
+	NEWKERNARGS=""\
+	(/sbin/grubby --info=`/sbin/grubby --default-kernel`) 2>/dev/null | grep -q crashkernel\
+	if [ $? -ne 0 ]\
+	then\
+        	NEWKERNARGS="--kernel-args=\"crashkernel=auto\""\
+	fi\
+	/sbin/new-kernel-pkg --package kernel%{?1:-%{1}} --mkinitrd --dracut --depmod --update %{KVERREL}%{?1:.%{1}} $NEWKERNARGS || exit $?\
+	/sbin/new-kernel-pkg --package kernel%{?1:-%{1}} --rpmposttrans %{KVERREL}%{?1:.%{1}} || exit $?\
+	if [ -x /sbin/weak-modules ]\
+	then\
+		/sbin/weak-modules --add-kernel %{KVERREL}%{?1:.%{1}} || exit $?\
+	fi\
+fi\
 %{nil}
 
 #
